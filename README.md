@@ -3,7 +3,7 @@
 
 ## 用いたもの
 ### TensorFlow
-https://www.tensorflow.org/tutorials/keras/basic_classification
+https://www.tensorflow.org/tutorials/keras/basic_classification 
 機械学習モデルの開発およびトレーニングに役立つオープンソースのコア ライブラリです。
 #### Setup
 ```command line
