@@ -2,12 +2,18 @@
 機械学習を用いて、お寿司のネタを判別しようというものです。
 
 ## 用いたもの
-### TensorFlow
+### TensorFlow(結局使わなかった)
 https://www.tensorflow.org/tutorials/keras/basic_classification  
 機械学習モデルの開発およびトレーニングに役立つオープンソースのコア ライブラリです。
 #### Setup
 ```command line
 $ pip install tensorflow
+```
+
+### Keras
+#### Setup
+```command line
+$ pip install keras
 ```
 
 ### google_images_download
