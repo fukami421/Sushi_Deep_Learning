@@ -1,10 +1,9 @@
 import os
 import numpy as np
 import cv2
-import tensorflow as tf
-# from tensorflow import keras
 import matplotlib.pyplot as plt
 from keras import layers, models, optimizers
+from keras.utils import np_utils
 
 NUM_CLASSES = 3 # 分類するクラス数
 IMG_SIZE = 280 # 画像の1辺の長さ
@@ -22,8 +21,7 @@ test_images = []
 test_labels = []
 
 #学習用データセット作成
-# def make_train_data():
-for i, dir_name in enumerate(img_dirs):
+for label, dir_name in enumerate(img_dirs):
     # ./data/以下の各ディレクトリ内のファイル名取得
     files = os.listdir(os.getcwd() + '/imgs/train_images/' + dir_name)
     for file in files:
@@ -34,29 +32,19 @@ for i, dir_name in enumerate(img_dirs):
                 img = cv2.resize(img, dsize=(IMG_SIZE, IMG_SIZE), interpolation=cv2.INTER_NEAREST)
                 # OpenCVの関数cvtColorでBGRとRGBを変換
                 img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-                # resize後の画像サイズを取得
-                height, width, ch = img.shape
-                img_column_rgb = []# 列
-                for h in range(height):
-                        img_row_rgb = []# 行
-                        for w in range(width):
-                                img_cell_rgb = img[h, w]
-                                img_row_rgb.append(img_cell_rgb)
-                        img_column_rgb.append(img_row_rgb)
-                train_images.append(img_column_rgb)
-
+                # Numpy配列にする
+                data = np.asarray(img)
+                # 配列に追加
+                train_images.append(data)
                 # ラベル
-                tmp = np.zeros(NUM_CLASSES)#0で初期化されたndarrayを生成する関数
-                tmp[i] = i
-                train_labels.append(tmp[i])
+                train_labels.append(label)
 
 # numpy配列に変換
-train_images = np.asarray(train_images)
-train_labels = np.asarray(train_labels)
+train_images = np.array(train_images)
+train_labels = np.array(train_labels)
 
 #テスト用データセット作成
-# def make_test_data():
-for i, dir_name in enumerate(img_dirs):
+for label, dir_name in enumerate(img_dirs):
     # ./data/以下の各ディレクトリ内のファイル名取得
     files = os.listdir(os.getcwd() + '/imgs/test_images/' + dir_name)
     for file in files:
@@ -67,25 +55,16 @@ for i, dir_name in enumerate(img_dirs):
                 img = cv2.resize(img, (IMG_SIZE, IMG_SIZE))
                 # OpenCVの関数cvtColorでBGRとRGBを変換
                 img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-                # resize後の画像サイズを取得
-                height, width, ch = img.shape
-                img_column_rgb = []# 列
-                for h in range(height):
-                        img_row_rgb = []# 行
-                        for w in range(width):
-                                img_cell_rgb = img[h, w]
-                                img_row_rgb.append(img_cell_rgb)
-                        img_column_rgb.append(img_row_rgb)
-                test_images.append(img_column_rgb)
-
+                # Numpy配列にする
+                data = np.asarray(img)
+                # 配列に追加
+                test_images.append(data)
                 # ラベル
-                tmp = np.zeros(NUM_CLASSES)#0で初期化されたndarrayを生成する関数
-                tmp[i] = i
-                test_labels.append(tmp[i])
+                test_labels.append(label)
 
 # numpy配列に変換
-test_images = np.asarray(test_images)
-test_labels = np.asarray(test_labels)
+test_images = np.array(test_images)
+test_labels = np.array(test_labels)
 
 #ニューラルネットワークにデータを投入する前に、これらの値を0から1までの範囲にスケールする
 train_images = train_images.astype('float32') / 255.0
@@ -93,6 +72,10 @@ test_images = test_images.astype('float32') / 255.0
 
 class_names = ['Squid', 'Octopus', 'Tuna',]
 
+# train_labels = np_utils.to_categorical(train_labels, NUM_CLASSES)
+# test_labels = np_utils.to_categorical(test_labels, NUM_CLASSES)
+# train_labels = np.ndarray.flatten(train_labels)
+# test_labels = np.ndarray.flatten(test_labels)
 #モデルの構築
 model = models.Sequential()
 model.add(layers.Conv2D(32,(3,3),activation="relu",input_shape=(IMG_SIZE,IMG_SIZE,3)))
@@ -107,29 +90,42 @@ model.add(layers.Flatten())
 model.add(layers.Dense(512,activation="relu"))
 model.add(layers.Dense(3,activation="sigmoid")) #分類先の種類分設定
 
-#モデル構成の確認
-model.summary()
-
-# model.compile(optimizer=tf.keras.optimizers.Adam(lr=1e-3),
-#               loss='sparse_categorical_crossentropy',
-#               metrics=['acc'])
-
-model.compile(optimizer=optimizers.RMSprop(lr=1e-3),
+#モデルのコンパイル
+model.compile(optimizer=optimizers.RMSprop(lr=1e-4),
               loss="sparse_categorical_crossentropy",
               metrics=["acc"])
 
 fit = model.fit(
         train_images, train_labels,
-        batch_size=128,
-        epochs=3,
-        verbose=2,
-        # validation_data=(X_valid, Y_valid),
-        callbacks=[])              
+        batch_size=6,
+        nb_epoch=10,)
+        # verbose=2,)
+        # validation_data=(test_images,test_labels))
 
 test_loss, test_acc = model.evaluate(test_images, test_labels)
 
 print('Test accuracy:', test_acc)
+def plot_history(history):
+    # print(history.history.keys())
 
+    # 精度の履歴をプロット
+    plt.plot(history.history['acc'])
+    plt.plot(history.history['val_acc'])
+    plt.title('model accuracy')
+    plt.xlabel('epoch')
+    plt.ylabel('accuracy')
+    plt.legend(['acc', 'val_acc'], loc='lower right')
+    plt.show()
+
+    # 損失の履歴をプロット
+    plt.plot(history.history['loss'])
+    plt.plot(history.history['val_loss'])
+    plt.title('model loss')
+    plt.xlabel('epoch')
+    plt.ylabel('loss')
+    plt.legend(['loss', 'val_loss'], loc='lower right')
+    plt.show()
+plot_history(fit)
 # predictions = model.predict(test_images)
 # print('predictions[0]: ', predictions[0])
 # print('一番信頼度が高いラベル: ', np.argmax(predictions[0]))
