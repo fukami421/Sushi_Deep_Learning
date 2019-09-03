@@ -72,13 +72,13 @@ test_images = test_images.astype('float32') / 255.0
 
 class_names = ['Squid', 'Octopus', 'Tuna',]
 
-# train_labels = np_utils.to_categorical(train_labels, NUM_CLASSES)
-# test_labels = np_utils.to_categorical(test_labels, NUM_CLASSES)
-# train_labels = np.ndarray.flatten(train_labels)
-# test_labels = np.ndarray.flatten(test_labels)
+train_labels = np_utils.to_categorical(train_labels, NUM_CLASSES)
+print(len(train_labels))
+test_labels = np_utils.to_categorical(test_labels, NUM_CLASSES)
+
 #モデルの構築
 model = models.Sequential()
-model.add(layers.Conv2D(32,(3,3),activation="relu",input_shape=(IMG_SIZE,IMG_SIZE,3)))
+model.add(layers.Conv2D(32,(3,3),activation="relu",input_shape=(IMG_SIZE, IMG_SIZE, NUM_CLASSES)))
 model.add(layers.MaxPooling2D((2,2)))
 model.add(layers.Conv2D(64,(3,3),activation="relu"))
 model.add(layers.MaxPooling2D((2,2)))
@@ -88,26 +88,27 @@ model.add(layers.Conv2D(128,(3,3),activation="relu"))
 model.add(layers.MaxPooling2D((2,2)))
 model.add(layers.Flatten())
 model.add(layers.Dense(512,activation="relu"))
-model.add(layers.Dense(3,activation="sigmoid")) #分類先の種類分設定
+model.add(layers.Dropout(0.2))
+model.add(layers.Dense(3,activation="softmax")) #分類先の種類分設定
 
 #モデルのコンパイル
 model.compile(optimizer=optimizers.RMSprop(lr=1e-4),
-              loss="sparse_categorical_crossentropy",
+              loss="categorical_crossentropy",
               metrics=["acc"])
 
+# モデルの学習
 fit = model.fit(
         train_images, train_labels,
         batch_size=6,
-        nb_epoch=10,)
-        # verbose=2,)
-        # validation_data=(test_images,test_labels))
+        epochs=10,
+        verbose=1,
+        validation_data=(test_images,test_labels))
 
+# モデルの評価
 test_loss, test_acc = model.evaluate(test_images, test_labels)
 
 print('Test accuracy:', test_acc)
 def plot_history(history):
-    # print(history.history.keys())
-
     # 精度の履歴をプロット
     plt.plot(history.history['acc'])
     plt.plot(history.history['val_acc'])
@@ -125,7 +126,9 @@ def plot_history(history):
     plt.ylabel('loss')
     plt.legend(['loss', 'val_loss'], loc='lower right')
     plt.show()
+
 plot_history(fit)
+
 # predictions = model.predict(test_images)
 # print('predictions[0]: ', predictions[0])
 # print('一番信頼度が高いラベル: ', np.argmax(predictions[0]))
