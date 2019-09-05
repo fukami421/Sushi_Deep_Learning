@@ -11,6 +11,9 @@ IMG_SIZE = 280 # 画像の1辺の長さ
 # 画像のあるディレクトリ
 img_dirs = ['イカ', 'タコ', 'マグロ']
 
+# class name
+class_names = ['Squid', 'Octopus', 'Tuna',]
+
 # 学習用画像データ
 train_images = []
 # 学習用データのラベル
@@ -66,17 +69,15 @@ for label, dir_name in enumerate(img_dirs):
 test_images = np.array(test_images)
 test_labels = np.array(test_labels)
 
-#ニューラルネットワークにデータを投入する前に、これらの値を0から1までの範囲にスケールする
+# ニューラルネットワークにデータを投入する前に、これらの値を0から1までの範囲にスケールする
 train_images = train_images.astype('float32') / 255.0
 test_images = test_images.astype('float32') / 255.0
 
-class_names = ['Squid', 'Octopus', 'Tuna',]
-
+# One-Hotエンコーディングする
 train_labels = np_utils.to_categorical(train_labels, NUM_CLASSES)
-print(len(train_labels))
 test_labels = np_utils.to_categorical(test_labels, NUM_CLASSES)
 
-#モデルの構築
+# モデルの構築
 model = models.Sequential()
 model.add(layers.Conv2D(32,(3,3),activation="relu",input_shape=(IMG_SIZE, IMG_SIZE, NUM_CLASSES)))
 model.add(layers.MaxPooling2D((2,2)))
@@ -88,7 +89,7 @@ model.add(layers.Conv2D(128,(3,3),activation="relu"))
 model.add(layers.MaxPooling2D((2,2)))
 model.add(layers.Flatten())
 model.add(layers.Dense(512,activation="relu"))
-model.add(layers.Dropout(0.2))
+model.add(layers.Dropout(0.5))
 model.add(layers.Dense(3,activation="softmax")) #分類先の種類分設定
 
 #モデルのコンパイル
@@ -100,14 +101,14 @@ model.compile(optimizer=optimizers.RMSprop(lr=1e-4),
 fit = model.fit(
         train_images, train_labels,
         batch_size=6,
-        epochs=10,
+        epochs=5,
         verbose=1,
         validation_data=(test_images,test_labels))
 
 # モデルの評価
 test_loss, test_acc = model.evaluate(test_images, test_labels)
-
 print('Test accuracy:', test_acc)
+
 def plot_history(history):
     # 精度の履歴をプロット
     plt.plot(history.history['acc'])
@@ -129,9 +130,14 @@ def plot_history(history):
 
 plot_history(fit)
 
-# predictions = model.predict(test_images)
-# print('predictions[0]: ', predictions[0])
-# print('一番信頼度が高いラベル: ', np.argmax(predictions[0]))
+# 予測する
+predictions = model.predict(test_images)
+print('predictions[0]: ', predictions[0])
+print('一番信頼度が高いラベル: ', np.argmax(predictions[0]))
+print('正解は: ', test_labels[0])
+
+# モデル保存
+# model.save('model.h5', include_optimizer=False)
 
 # def plot_image(i, predictions_array, true_label, img):
 #         predictions_array, true_label, img = predictions_array[i], true_label[i], img[i]
