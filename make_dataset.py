@@ -79,6 +79,7 @@ test_labels = np_utils.to_categorical(test_labels, NUM_CLASSES)
 
 # モデルの構築
 model = models.Sequential()
+model.add(layers.BatchNormalization())
 model.add(layers.Conv2D(32,(3,3),activation="relu",input_shape=(IMG_SIZE, IMG_SIZE, NUM_CLASSES)))
 model.add(layers.MaxPooling2D((2,2)))
 model.add(layers.Conv2D(64,(3,3),activation="relu"))
@@ -89,11 +90,11 @@ model.add(layers.Conv2D(128,(3,3),activation="relu"))
 model.add(layers.MaxPooling2D((2,2)))
 model.add(layers.Flatten())
 model.add(layers.Dense(512,activation="relu"))
-model.add(layers.Dropout(0.5))
-model.add(layers.Dense(3,activation="softmax")) #分類先の種類分設定
+# model.add(layers.Dropout(0.5))
+model.add(layers.Dense(NUM_CLASSES,activation="softmax"))
 
 #モデルのコンパイル
-model.compile(optimizer=optimizers.RMSprop(lr=1e-4),
+model.compile(optimizer=optimizers.RMSprop(lr=1e-4, rho=0.9, epsilon=1e-08, decay=0.0),
               loss="categorical_crossentropy",
               metrics=["acc"])
 
@@ -131,10 +132,20 @@ def plot_history(history):
 plot_history(fit)
 
 # 予測する
-predictions = model.predict(test_images)
-print('predictions[0]: ', predictions[0])
-print('一番信頼度が高いラベル: ', np.argmax(predictions[0]))
-print('正解は: ', test_labels[0])
+# predictions = model.predict(test_images, batch_size=6)
+# print('predictions[0]: ', predictions[0])
+# print('一番信頼度が高いラベル: ', np.argmax(predictions[0]))
+# print('正解は: ', test_labels[0])
+# print('一番信頼度が高いラベル: ', np.argmax(predictions[1]))
+# print('正解は: ', test_labels[1])
+
+# plt.figure()
+# plt.imshow(test_images[0])
+# plt.show()
+
+# plt.figure()
+# plt.imshow(test_images[1])
+# plt.show()
 
 # モデル保存
 # model.save('model.h5', include_optimizer=False)
