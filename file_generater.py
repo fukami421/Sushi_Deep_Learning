@@ -27,30 +27,37 @@ ImageDataGenerator(
     validation_split=0.0)
 """
 
-# 指定したディレクトリ内のファイルを取得
-files = os.listdir(os.getcwd() + '/imgs/train_images/' + 'イカ')
- 
-# 出力ディレクトリを作成
-output_dir = os.getcwd() + '/imgs/train_images/イカ2/'
-if os.path.isdir(output_dir) == False:
-    os.mkdir(output_dir)
+def get_files(dir_name):
+    # 指定したディレクトリ内のファイルを取得
+    files = os.listdir(os.getcwd() + '/imgs/train_images/' + dir_name)
+    return files
 
-# 画像を変換して新たに作成  
-for i, file in enumerate(files):
-    # if os.path.isdir(file) is True:
+def make_dir(new_dir_name):
+    # 出力ディレクトリを作成
+    output_dir = os.getcwd() + '/imgs/train_images/' + new_dir_name + '/'
+    if os.path.isdir(output_dir) == False:
+        os.mkdir(output_dir)
+    return output_dir
+
+def make_img_file(dir_name, new_dir_name, time):
+    # 画像を変換して新たに作成  
+    output_dir = make_dir(new_dir_name)
+    for i, file in enumerate(get_files(dir_name)):
         if file == '.DS_Store':
             continue
 
-        img = load_img(os.getcwd() + '/imgs/train_images/' + 'イカ/' + file)
+        img = load_img(os.getcwd() + '/imgs/train_images/' + dir_name + '/' + file)
         x = img_to_array(img)
         x = np.expand_dims(x, axis=0)
     
-        # ImageDataGeneratorの生成
+        # ImageDataGeneratorの生成(ここを変更するとそれに沿った画像が生成される)
         datagen = ImageDataGenerator(
           rotation_range=90.0,
         )
     
         # 9個の画像を生成します
-        g = datagen.flow(x, batch_size=1, save_to_dir=output_dir, save_prefix='', save_format='jpg')
-        for i in range(9):
-            batch = g.next()
+        created_img = datagen.flow(x, batch_size=1, save_to_dir = output_dir, save_prefix = '', save_format = 'jpg')
+        for i in range(time):
+            batch = created_img.next()
+
+make_img_file('タコ', 'Tako', 4)
