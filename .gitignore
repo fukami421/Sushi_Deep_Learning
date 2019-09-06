@@ -6,3 +6,6 @@ result/
 
 # 画像ファイルはあげない
 imgs/
+
+# テスト用のファイル
+hist_matching.py

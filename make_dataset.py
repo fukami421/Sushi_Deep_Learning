@@ -4,15 +4,16 @@ import cv2
 import matplotlib.pyplot as plt
 from keras import layers, models, optimizers
 from keras.utils import np_utils
+from keras.callbacks import EarlyStopping
 
 NUM_CLASSES = 3 # 分類するクラス数
 IMG_SIZE = 280 # 画像の1辺の長さ
 
 # 画像のあるディレクトリ
-img_dirs = ['イカ', 'ライオン', 'マグロ']
+img_dirs = ['タコ', 'ライオン', 'マグロ']
 
 # class name
-class_names = ['Squid', 'Lion', 'Tuna',]
+class_names = ['octopus', 'Lion', 'Tuna',]
 
 # 学習用画像データ
 train_images = []
@@ -80,31 +81,45 @@ test_labels = np_utils.to_categorical(test_labels, NUM_CLASSES)
 # モデルの構築
 model = models.Sequential()
 model.add(layers.BatchNormalization())
-model.add(layers.Conv2D(32,(3,3),activation="relu",input_shape=(IMG_SIZE, IMG_SIZE, NUM_CLASSES)))
+model.add(layers.Conv2D(32,(3,3), activation="relu", border_mode="same", input_shape=(IMG_SIZE, IMG_SIZE, NUM_CLASSES)))
+# model.add(activation = "relu")
+model.add(layers.Conv2D(32,(3,3), activation="relu", border_mode="same"))
+# model.add(activation = "relu")
 model.add(layers.MaxPooling2D((2,2)))
-model.add(layers.Conv2D(64,(3,3),activation="relu"))
+model.add(layers.Dropout(0.5))
+model.add(layers.Conv2D(64,(3,3), activation="relu", border_mode="same"))
+# model.add(activation = "relu")
+model.add(layers.Conv2D(64,(3,3), activation="relu", border_mode="same"))
+# model.add(activation = "relu")
 model.add(layers.MaxPooling2D((2,2)))
-model.add(layers.Conv2D(128,(3,3),activation="relu"))
+model.add(layers.Dropout(0.5))
+model.add(layers.Conv2D(128,(3,3), activation="relu", border_mode="same"))
+# model.add(activation = "relu")
+model.add(layers.Conv2D(128,(3,3), activation="relu", border_mode="same"))
+# model.add(activation = "relu")
 model.add(layers.MaxPooling2D((2,2)))
-model.add(layers.Conv2D(128,(3,3),activation="relu"))
-model.add(layers.MaxPooling2D((2,2)))
+model.add(layers.Dropout(0.5))
 model.add(layers.Flatten())
-model.add(layers.Dense(512,activation="relu"))
-# model.add(layers.Dropout(0.5))
-model.add(layers.Dense(NUM_CLASSES,activation="softmax"))
+model.add(layers.Dense(100, activation="relu"))
+model.add(layers.Dropout(0.5))
+model.add(layers.Dense(NUM_CLASSES, activation="softmax"))
 
 #モデルのコンパイル
 model.compile(optimizer=optimizers.RMSprop(lr=1e-4, rho=0.9, epsilon=1e-08, decay=0.0),
               loss="categorical_crossentropy",
               metrics=["acc"])
 
+# Early-stopping
+early_stopping = EarlyStopping(monitor='val_loss', patience=2, verbose=1, mode='auto')
+
 # モデルの学習
 fit = model.fit(
         train_images, train_labels,
-        batch_size=6,
-        epochs=5,
-        verbose=1,
-        validation_data=(test_images,test_labels))
+        batch_size=10,
+        epochs=7,
+        # verbose=1,
+        validation_split=0.1,
+        callbacks=[early_stopping])
 
 # モデルの評価
 test_loss, test_acc = model.evaluate(test_images, test_labels)
