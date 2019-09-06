@@ -9,10 +9,10 @@ NUM_CLASSES = 3 # 分類するクラス数
 IMG_SIZE = 280 # 画像の1辺の長さ
 
 # 画像のあるディレクトリ
-img_dirs = ['イカ', 'タコ', 'マグロ']
+img_dirs = ['イカ', 'ライオン', 'マグロ']
 
 # class name
-class_names = ['Squid', 'Octopus', 'Tuna',]
+class_names = ['Squid', 'Lion', 'Tuna',]
 
 # 学習用画像データ
 train_images = []

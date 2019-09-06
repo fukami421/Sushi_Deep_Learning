@@ -7,4 +7,4 @@ def rename_files(file_name, dir_name):
     new_name = number + '.jpg'
     os.rename(os.getcwd() + '/imgs/' + dir_name + '/' + file_name +'/' + old_name, os.getcwd() + '/imgs/' + dir_name + '/' + file_name +'/' + new_name)
     print(old_name + '→' + new_name)
-rename_files('ライオン', 'train_images')
+rename_files('ライオン', 'test_images')
