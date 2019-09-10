@@ -10,10 +10,10 @@ NUM_CLASSES = 3 # 分類するクラス数
 IMG_SIZE = 280 # 画像の1辺の長さ
 
 # 画像のあるディレクトリ
-img_dirs = ['タコ', 'ライオン', 'マグロ']
+img_dirs = ['dog', 'lion', 'cat']
 
 # class name
-class_names = ['octopus', 'Lion', 'Tuna',]
+class_names = ['dog', 'lion', 'cat',]
 
 # 学習用画像データ
 train_images = []
@@ -85,12 +85,13 @@ model.add(layers.Conv2D(32,(3,3),activation="relu",input_shape=(IMG_SIZE, IMG_SI
 model.add(layers.MaxPooling2D((2,2)))
 model.add(layers.Conv2D(64,(3,3),activation="relu"))
 model.add(layers.MaxPooling2D((2,2)))
-model.add(layers.Conv2D(128,(3,3),activation="relu"))
-model.add(layers.MaxPooling2D((2,2)))
-model.add(layers.Conv2D(128,(3,3),activation="relu"))
-model.add(layers.MaxPooling2D((2,2)))
+# model.add(layers.Conv2D(128,(3,3),activation="relu"))
+# model.add(layers.MaxPooling2D((2,2)))
+# model.add(layers.Conv2D(128,(3,3),activation="relu"))
+# model.add(layers.MaxPooling2D((2,2)))
+model.add(layers.Dropout(0.25))
 model.add(layers.Flatten())
-model.add(layers.Dense(512,activation="relu"))
+model.add(layers.Dense(128,activation="relu"))
 model.add(layers.Dropout(0.5))
 model.add(layers.Dense(NUM_CLASSES,activation="softmax"))
 
@@ -105,8 +106,8 @@ early_stopping = EarlyStopping(monitor='val_loss', patience=2, verbose=1, mode='
 # モデルの学習
 fit = model.fit(
         train_images, train_labels,
-        batch_size=6,
-        epochs=5,
+        batch_size=10,
+        epochs=10,
         verbose=1,
         validation_split=0.1,
         callbacks=[early_stopping])
@@ -137,12 +138,15 @@ def plot_history(history):
 plot_history(fit)
 
 # 予測する
-# predictions = model.predict(test_images, batch_size=6)
-# print('predictions[0]: ', predictions[0])
-# print('一番信頼度が高いラベル: ', np.argmax(predictions[0]))
-# print('正解は: ', test_labels[0])
-# print('一番信頼度が高いラベル: ', np.argmax(predictions[1]))
-# print('正解は: ', test_labels[1])
+predictions = model.predict(test_images, batch_size=6)
+print('一番信頼度が高いラベル: ', np.argmax(predictions[0]))
+print('正解は: ', test_labels[0])
+print('一番信頼度が高いラベル: ', np.argmax(predictions[1]))
+print('正解は: ', test_labels[1])
+print('一番信頼度が高いラベル: ', np.argmax(predictions[2                 ]))
+print('正解は: ', test_labels[2])
+print('一番信頼度が高いラベル: ', np.argmax(predictions[3]))
+print('正解は: ', test_labels[3])
 
 # plt.figure()
 # plt.imshow(test_images[0])
@@ -154,70 +158,3 @@ plot_history(fit)
 
 # モデル保存
 # model.save('model.h5', include_optimizer=False)
-
-# def plot_image(i, predictions_array, true_label, img):
-#         predictions_array, true_label, img = predictions_array[i], true_label[i], img[i]
-#         plt.grid(False)
-#         plt.xticks([])
-#         plt.yticks([])
-        
-#         plt.imshow(img, cmap=plt.cm.binary)
-        
-#         predicted_label = np.argmax(predictions_array)
-#         if predicted_label == true_label:
-#             color = 'blue'
-#         else:
-#             color = 'red'
-        
-#         plt.xlabel("{} {:2.0f}% ({})".format(class_names[predicted_label],
-#                                         100*np.max(predictions_array),
-#                                         class_names[int(true_label)]),
-#                                         color=color)
-    
-# def plot_value_array(i, predictions_array, true_label):
-#         predictions_array, true_label = predictions_array[i], true_label[i]
-#         plt.grid(False)
-#         plt.xticks([])
-#         plt.yticks([])
-#         thisplot = plt.bar(range(10), predictions_array, color="#777777")
-#         plt.ylim([0, 1])
-#         predicted_label = np.argmax(predictions_array)
-
-#         thisplot[predicted_label].set_color('red')
-#         thisplot[true_label].set_color('blue')
-
-
-# i = 0
-# plt.figure(figsize=(6,3))
-# plt.subplot(1,2,1)
-# plot_image(i, predictions, test_labels, test_images)
-# plt.subplot(1,2,2)
-# plot_value_array(i, predictions,  test_labels)
-# plt.show()
-
-# fig, (axL, axR) = plt.subplots(ncols=2, figsize=(10,4))
-
-# # loss
-# def plot_history_loss(fit):
-#     # Plot the loss in the history
-#     axL.plot(fit.history['loss'],label="loss for training")
-#     axL.plot(fit.history['val_loss'],label="loss for validation")
-#     axL.set_title('model loss')
-#     axL.set_xlabel('epoch')
-#     axL.set_ylabel('loss')
-#     axL.legend(loc='upper right')
-
-# # acc
-# def plot_history_acc(fit):
-#     # Plot the loss in the history
-#     axR.plot(fit.history['acc'],label="loss for training")
-#     axR.plot(fit.history['val_acc'],label="loss for validation")
-#     axR.set_title('model accuracy')
-#     axR.set_xlabel('epoch')
-#     axR.set_ylabel('accuracy')
-#     axR.legend(loc='upper right')
-
-# plot_history_loss(fit)
-# plot_history_acc(fit)
-# fig.savefig('./mnist-tutorial.png')
-# plt.close()

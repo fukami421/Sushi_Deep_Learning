@@ -39,7 +39,7 @@ def make_dir(new_dir_name):
         os.mkdir(output_dir)
     return output_dir
 
-def make_img_file(dir_name, new_dir_name, time):
+def make_img_file(dir_name, new_dir_name, n):
     # 画像を変換して新たに作成  
     output_dir = make_dir(new_dir_name)
     for i, file in enumerate(get_files(dir_name)):
@@ -55,9 +55,9 @@ def make_img_file(dir_name, new_dir_name, time):
           rotation_range=90.0,
         )
     
-        # 9個の画像を生成します
+        # n個の画像を生成します
         created_img = datagen.flow(x, batch_size=1, save_to_dir = output_dir, save_prefix = '', save_format = 'jpg')
-        for i in range(time):
+        for i in range(n):
             batch = created_img.next()
 
-make_img_file('タコ', 'Tako', 4)
+make_img_file('cat', 'cat_', 1)
