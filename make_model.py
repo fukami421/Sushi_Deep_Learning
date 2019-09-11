@@ -1,4 +1,5 @@
 import os
+import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 from tensorflow.keras.applications.vgg16 import VGG16, preprocess_input
@@ -67,7 +68,6 @@ val_generator = datagen.flow_from_directory(
 
 # クラス ID とクラス名の対応関係
 print(train_generator.class_indices)
-# {'daisy': 0, 'dandelion': 1, 'roses': 2, 'sunflowers': 3, 'tulips': 4}
 
 # 学習する。
 history = model.fit_generator(
@@ -77,3 +77,50 @@ history = model.fit_generator(
     validation_steps=val_generator.samples // batch_size,
     epochs=num_epochs,
 )
+
+class_names = list(val_generator.class_indices.keys())
+
+def plot_prediction(img, prediction, label):
+    pred_label = np.argmax(prediction)
+
+    fig, [ax1, ax2] = plt.subplots(1, 2, figsize=(10, 5), facecolor="w")
+
+    ax1.imshow(img)
+    ax1.set_xticks([])
+    ax1.set_yticks([])
+    ax1.set_xlabel(
+        f"{class_names[pred_label]} {prediction[pred_label]:.2%} ({class_names[label]})",
+        fontsize=15,
+    )
+    
+    bar_xs = np.arange(len(class_names))  # 棒の位置
+    ax2.bar(bar_xs, prediction)
+    ax2.set_xticks(bar_xs)
+    ax2.set_xticklabels(class_names, rotation="vertical", fontsize=15)
+
+def prepare_img(dir_name): 
+    # ファイル名はとりあえず指定しておく(1.jpg)
+    # テストデータから3サンプル推論して、結果を表示する。
+    img_path = '/content/drive/My Drive/Colab Notebooks/imgs/test_images/' + dir_name + '/1.jpg' # google colaboratoryの場合
+    label = train_generator.class_indices[dir_name]
+    # 画像を読み込む。
+    img = cv2.imread(img_path)
+    # 1辺がIMG_SIZEの正方形にリサイズ
+    img = cv2.resize(img, dsize=(224, 224), interpolation=cv2.INTER_NEAREST)
+    # OpenCVの関数cvtColorでBGRとRGBを変換
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    # PIL -> numpy 配列
+    img = np.array(img)
+    # バッチ次元を追加する。
+    x = np.expand_dims(img, axis=0)
+    # 前処理を行う。
+    x = preprocess_input(x)
+
+    # 推論する。
+    prediction = model.predict(x)
+    return label, prediction
+
+label, prediction = prepare_img('dog')
+
+# 推論結果を可視化する。
+plot_prediction(img, prediction[0], label)
