@@ -37,7 +37,8 @@ $ googleimagesdownload --keywords "指定したい検索ワード" --limit 1000 
 $ python3 rename.py 
 
 # 学習させて、識別結果の正確性を数値化
-$ python3 make_dataset.py
+$ python3 make_dataset.py # 失敗
+$ python3 make_model.py # google colaboratoryにて成功
 
 # 画像ファイルを水増しする 
 # 関数の引数でディレクトリ名を指定  
