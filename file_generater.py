@@ -52,7 +52,13 @@ def make_img_file(dir_name, new_dir_name, n):
     
         # ImageDataGeneratorの生成(ここを変更するとそれに沿った画像が生成される)
         datagen = ImageDataGenerator(
-          rotation_range=90.0,
+          rotation_range=40.0,
+          horizontal_flip=True,
+          width_shift_range=0.2,
+          height_shift_range=0.2,
+          shear_range=0.2,
+          zoom_range=0.2,
+          fill_mode='nearest',
         )
     
         # n個の画像を生成します
@@ -60,4 +66,4 @@ def make_img_file(dir_name, new_dir_name, n):
         for i in range(n):
             batch = created_img.next()
 
-make_img_file('cat', 'cat_', 1)
+make_img_file('ebi', 'ebi', 20)

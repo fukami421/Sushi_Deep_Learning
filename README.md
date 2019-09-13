@@ -44,3 +44,12 @@ $ python3 make_model.py # google colaboratoryにて成功
 # 関数の引数でディレクトリ名を指定  
 $ python3 file_generater.py  
 ``` 
+
+## make_model.pyをgoogle colaboratoryで実行する
+google acountで認証が必要
+```google colaboratory
+from google.colab import drive
+drive.mount('/content/drive')
+```
+dataset_dirに適切なパスを代入する。
+
