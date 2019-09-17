@@ -6,6 +6,7 @@ result/
 
 # 画像ファイルはあげない
 imgs/
+Disney_imgs/
 
 # テスト用のファイル
 hist_matching.py
