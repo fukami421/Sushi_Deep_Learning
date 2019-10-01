@@ -7,6 +7,7 @@ result/
 # 画像ファイルはあげない
 imgs/
 Disney_imgs/
+animal_imgs/
 
 # テスト用のファイル
 hist_matching.py
