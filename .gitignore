@@ -11,3 +11,8 @@ animal_imgs/
 
 # テスト用のファイル
 hist_matching.py
+
+# 完成済みのファイル
+google_images_download.py
+
+resize.py

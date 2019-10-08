@@ -1,5 +1,4 @@
 import os
-import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 from tensorflow.keras.applications.vgg16 import VGG16, preprocess_input
@@ -8,10 +7,12 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.preprocessing import image
 from tensorflow.keras.utils import get_file
 
-num_classes = 3  # クラス数
+num_classes = 12  # クラス数
 
 # VGG16 モデルを作成する。
-vgg16 = VGG16(include_top=False, input_shape=(224, 224, 3))
+vgg16 = VGG16(include_top=False, weights = "imagenet",  input_shape=(224, 224, 3))
+# for layer in vgg16.layers[:15]:
+#    layer.trainable = False
 vgg16.trainable = False  # 重みをフリーズする。
 
 model = Sequential(
@@ -35,7 +36,7 @@ model.compile(
 
 # ハイパーパラメータ
 batch_size = 64  # バッチサイズ
-num_epochs = 30  # エポック数
+num_epochs = 35  # エポック数
 
 # ImageDataGenerator を作成する。
 datagen_params = {
@@ -44,14 +45,29 @@ datagen_params = {
     "brightness_range": (0.7, 1.3),
     "validation_split": 0.2,
 }
+
 datagen = image.ImageDataGenerator(**datagen_params)
 
+train_datagen =  image.ImageDataGenerator(
+   rescale=1.0 / 255,
+   shear_range=0.2,
+   zoom_range=0.2,
+   horizontal_flip=True,
+   rotation_range=10)
+
+test_datagen =  image.ImageDataGenerator(
+   rescale=1.0 / 255,
+   shear_range=0.2,
+)
+
 # dataset_dir
-dataset_dir = os.getcwd() + '/imgs/train_images/'
+dataset_dir = '/content/drive/My Drive/Colab Notebooks/imgs/sushi/train_images/'
+test_dataset_dir = '/content/drive/My Drive/Colab Notebooks/imgs/sushi/test_images/'
+
 # 学習データを生成するジェネレーターを作成する。
 train_generator = datagen.flow_from_directory(
     dataset_dir,
-    target_size=model.input_shape[1:3],
+    target_size=(224, 224),
     batch_size=batch_size,
     class_mode="sparse",
     subset="training"
@@ -60,7 +76,7 @@ train_generator = datagen.flow_from_directory(
 # バリデーションデータを生成するジェネレーターを作成する。
 val_generator = datagen.flow_from_directory(
     dataset_dir,
-    target_size=model.input_shape[1:3],
+    target_size=(224, 224),
     batch_size=batch_size,
     class_mode="sparse",
     subset="validation",
@@ -87,7 +103,7 @@ ax1.plot(epochs, history.history["val_loss"], label="validation loss")
 ax1.set_xlabel("epochs")
 ax1.legend()
 
-# 精度の履歴を可視化する。
+# 精度の履歴を可視化する。       
 ax2.plot(epochs, history.history["acc"], label="accuracy")
 ax2.plot(epochs, history.history["val_acc"], label="validation accuracy")
 ax2.set_xlabel("epochs")
@@ -98,6 +114,7 @@ plt.show()
 # 評価する。
 test_loss, test_acc = model.evaluate_generator(val_generator)
 print(f"test loss: {test_loss:.2f}, test accuracy: {test_acc:.2%}")
+
 
 class_names = list(val_generator.class_indices.keys())
 

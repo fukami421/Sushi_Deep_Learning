@@ -36,6 +36,10 @@ $ googleimagesdownload --keywords "指定したい検索ワード" --limit 1000 
 # 関数の引数でディレクトリ名を指定  
 $ python3 rename.py 
 
+# 指定されたディレクトリ以下にあるファイルをリサイズ
+# 関数の引数でディレクトリ名を指定  
+$ python3 resize.py 
+
 # 学習させて、識別結果の正確性を数値化
 $ python3 make_dataset.py # 失敗
 $ python3 make_model.py # google colaboratoryにて成功

@@ -29,35 +29,35 @@ ImageDataGenerator(
 
 def get_files(dir_name):
     # 指定したディレクトリ内のファイルを取得
-    files = os.listdir(os.getcwd() + '/imgs/train_images/' + dir_name)
+    files = os.listdir(os.getcwd() + '/imgs/' + dir_name)
     return files
 
 def make_dir(new_dir_name):
     # 出力ディレクトリを作成
-    output_dir = os.getcwd() + '/imgs/train_images/' + new_dir_name + '/'
+    output_dir = os.getcwd() + '/imgs/' + new_dir_name + '/'
     if os.path.isdir(output_dir) == False:
         os.mkdir(output_dir)
     return output_dir
 
-def make_img_file(dir_name, new_dir_name, n):
+def make_img_file(dir_name, n):
     # 画像を変換して新たに作成  
-    output_dir = make_dir(new_dir_name)
+    output_dir = make_dir(dir_name)
     for i, file in enumerate(get_files(dir_name)):
         if file == '.DS_Store':
             continue
 
-        img = load_img(os.getcwd() + '/imgs/train_images/' + dir_name + '/' + file)
+        img = load_img(os.getcwd() + '/imgs/' + dir_name + '/' + file)
         x = img_to_array(img)
         x = np.expand_dims(x, axis=0)
     
         # ImageDataGeneratorの生成(ここを変更するとそれに沿った画像が生成される)
         datagen = ImageDataGenerator(
-          rotation_range=40.0,
+          rotation_range=10.0,
           horizontal_flip=True,
-          width_shift_range=0.2,
-          height_shift_range=0.2,
-          shear_range=0.2,
-          zoom_range=0.2,
+          width_shift_range=0.01,
+          height_shift_range=0.01,
+          shear_range=0.01,
+        #   zoom_range=0.1,
           fill_mode='nearest',
         )
     
@@ -66,4 +66,4 @@ def make_img_file(dir_name, new_dir_name, n):
         for i in range(n):
             batch = created_img.next()
 
-make_img_file('ebi', 'ebi', 20)
+make_img_file('sushi/train_images/kohada', 15)
