@@ -2,17 +2,16 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 from tensorflow.keras.applications.vgg16 import VGG16, preprocess_input
-from tensorflow.keras.layers import Dense, Dropout, Flatten
+from tensorflow.keras.layers import Dense, Dropout, Flatten, Input
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.preprocessing import image
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.utils import get_file
 
 num_classes = 12  # クラス数
 
 # VGG16 モデルを作成する。
-vgg16 = VGG16(include_top=False, weights = "imagenet",  input_shape=(224, 224, 3))
-# for layer in vgg16.layers[:15]:
-#    layer.trainable = False
+vgg16 = VGG16(include_top=False, weights = "imagenet",  input_tensor = Input(shape=(224, 224, 3)))
+
 vgg16.trainable = False  # 重みをフリーズする。
 
 model = Sequential(
@@ -31,7 +30,7 @@ model.summary()
 
 # コンパイル
 model.compile(
-    optimizer="adam", loss="sparse_categorical_crossentropy", metrics=["accuracy"]
+    optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy"]
 )
 
 # ハイパーパラメータ
@@ -46,40 +45,27 @@ datagen_params = {
     "validation_split": 0.2,
 }
 
-datagen = image.ImageDataGenerator(**datagen_params)
-
-train_datagen =  image.ImageDataGenerator(
-   rescale=1.0 / 255,
-   shear_range=0.2,
-   zoom_range=0.2,
-   horizontal_flip=True,
-   rotation_range=10)
-
-test_datagen =  image.ImageDataGenerator(
-   rescale=1.0 / 255,
-   shear_range=0.2,
-)
-
+datagen = ImageDataGenerator(**datagen_params)
 # dataset_dir
-dataset_dir = '/content/drive/My Drive/Colab Notebooks/imgs/sushi/train_images/'
-test_dataset_dir = '/content/drive/My Drive/Colab Notebooks/imgs/sushi/test_images/'
+dataset_dir = '/content/drive/My Drive/Colab Notebooks/imgs/sushi/train/'
+validation_dir = '/content/drive/My Drive/Colab Notebooks/imgs/sushi/validation/'
 
+train_datagen = ImageDataGenerator(rescale=1. / 255)
+validation_datagen = ImageDataGenerator(rescale=1. / 255)
 # 学習データを生成するジェネレーターを作成する。
-train_generator = datagen.flow_from_directory(
+train_generator = train_datagen.flow_from_directory(
     dataset_dir,
     target_size=(224, 224),
     batch_size=batch_size,
-    class_mode="sparse",
-    subset="training"
+    class_mode="categorical",
 )
 
 # バリデーションデータを生成するジェネレーターを作成する。
-val_generator = datagen.flow_from_directory(
-    dataset_dir,
+val_generator = validation_datagen.flow_from_directory(
+    validation_dir,
     target_size=(224, 224),
     batch_size=batch_size,
-    class_mode="sparse",
-    subset="validation",
+    class_mode="categorical",
 )
 
 # クラス ID とクラス名の対応関係
@@ -114,50 +100,3 @@ plt.show()
 # 評価する。
 test_loss, test_acc = model.evaluate_generator(val_generator)
 print(f"test loss: {test_loss:.2f}, test accuracy: {test_acc:.2%}")
-
-
-class_names = list(val_generator.class_indices.keys())
-
-def plot_prediction(img, prediction, label):
-    pred_label = np.argmax(prediction)
-
-    fig, [ax1, ax2] = plt.subplots(1, 2, figsize=(10, 5), facecolor="w")
-
-    ax1.imshow(img)
-    ax1.set_xticks([])
-    ax1.set_yticks([])
-    ax1.set_xlabel(
-        f"{class_names[pred_label]} {prediction[pred_label]:.2%} ({class_names[label]})",
-        fontsize=15,
-    )
-    
-    bar_xs = np.arange(len(class_names))  # 棒の位置
-    ax2.bar(bar_xs, prediction)
-    ax2.set_xticks(bar_xs)
-    ax2.set_xticklabels(class_names, rotation="vertical", fontsize=15)
-
-# def prepare_img(dir_name): 
-# ファイル名はとりあえず指定しておく(1.jpg)
-# テストデータから3サンプル推論して、結果を表示する。
-img_path = '/content/drive/My Drive/Colab Notebooks/imgs/test_images/' + 'lion' + '/79.jpg' # google colaboratoryの場合
-label = train_generator.class_indices['lion']
-# 画像を読み込む。
-img = cv2.imread(img_path)
-# 1辺がIMG_SIZEの正方形にリサイズ
-img = cv2.resize(img, dsize=(224, 224), interpolation=cv2.INTER_NEAREST)
-# OpenCVの関数cvtColorでBGRとRGBを変換
-img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-# PIL -> numpy 配列
-img = np.array(img)
-# バッチ次元を追加する。
-x = np.expand_dims(img, axis=0)
-# 前処理を行う。
-x = preprocess_input(x)
-
-# 推論する。
-prediction = model.predict(x)
-
-# label, prediction = prepare_img('lion')
-
-# 推論結果を可視化する。
-plot_prediction(img, prediction[0], label)
