@@ -42,6 +42,7 @@ def make_dir(new_dir_name):
 def make_img_file(dir_name, n):
     # 画像を変換して新たに作成  
     output_dir = make_dir(dir_name)
+    print("start generating!!")
     for i, file in enumerate(get_files(dir_name)):
         if file == '.DS_Store':
             continue
@@ -65,5 +66,5 @@ def make_img_file(dir_name, n):
         created_img = datagen.flow(x, batch_size=1, save_to_dir = output_dir, save_prefix = '', save_format = 'jpg')
         for i in range(n):
             batch = created_img.next()
-
-make_img_file('sushi/train_images/kohada', 15)
+    print("completed!!")
+make_img_file('sushi/train_images/kk', 20)
