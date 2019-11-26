@@ -1,5 +1,6 @@
 # 保存されたモデル
 model.h5
+model/
 
 # モデルの精度の結果
 result/
