@@ -57,3 +57,7 @@ drive.mount('/content/drive')
 ```
 dataset_dirに適切なパスを代入する。
 
+## 結果
+甘エビ, ハマチ, ホタテ, イカ, いくら , 金目鯛, コハダ, 真鯛, マグロ, ネギトロ, サーモン, 卵, ウニの計13種のネタで96.37%という結果が出ました
+![sushi](https://user-images.githubusercontent.com/41050625/69895015-b1954680-136b-11ea-85ef-44f75bfc0cb6.png)
+
